@@ -7,6 +7,7 @@ from jsonmerge import descenders
 from jsonmerge.exceptions import SchemaError
 from jsonschema.validators import Draft4Validator
 import logging
+import math
 
 log = logging.getLogger(name=__name__)
 
@@ -114,11 +115,13 @@ class WalkInstance(Walk):
 
         if not base.is_undef():
             with self.base_resolver.resolving(base.ref) as resolved:
-                assert base.val == resolved
+                # nan is hacked in - we can't normally meaningfully compare two nan values
+                assert base.val == resolved or (math.isnan(base.val) and math.isnan(resolved))
 
         if not head.is_undef():
             with self.head_resolver.resolving(head.ref) as resolved:
-                assert head.val == resolved
+                # nan is hacked in - we can't normally meaningfully compare two nan values
+                assert head.val == resolved or (math.isnan(head.val) and math.isnan(resolved))
 
         rv = strategy.merge(self, base, head, schema, meta, objclass_menu=self.merger.objclass_menu, **kwargs)
 
